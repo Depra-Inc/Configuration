@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Depra.Configuration.Editor.Utils;
-using Depra.Configuration.Runtime.SO;
-using Depra.Configuration.Runtime.Utils;
+using Depra.Configuration.Runtime.Assets;
 using Depra.Extensions.CsharpTypes;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -14,21 +13,23 @@ namespace Depra.Configuration.Editor
 {
     internal class ObjectConfigWindow : EditorWindow
     {
-        private const string WindowName = "Configs";
+        private const string WindowName = "Config Inspector";
 
-        private List<ObjectConfig> _configs;
+        private List<ConfigObject> _configs;
+        
         private string[] _configsNames;
         private bool[] _isFoldout;
         private Vector2 _scrollPos;
         private string _searchRequest;
 
+        private static ObjectConfigWindow _window;
         private SearchField _searchField;
         private List<int> _matchedIndexes;
 
         public static void Open()
         {
-            var window = (ObjectConfigWindow)GetWindow(typeof(ObjectConfigWindow), false, WindowName);
-            window.Show();
+            _window = (ObjectConfigWindow)GetWindow(typeof(ObjectConfigWindow), false, WindowName);
+            _window.Show();
         }
 
         private void CreateGUI()
@@ -41,7 +42,8 @@ namespace Depra.Configuration.Editor
 
         private void RefreshCache()
         {
-            _configs = ObjectConfigLocator.GetAllConfigs();
+            _configs = ConfigAssetFinder.FindAllConfigs().ToList();
+            
             _isFoldout = new bool[_configs.Count];
             _searchField = new SearchField();
 
@@ -53,7 +55,7 @@ namespace Depra.Configuration.Editor
                 _configsNames[i] = GetConfigNameForSearch(_configs[i]);
             }
         }
-        
+
         private void SortConfigs()
         {
             _configs.Sort(new ConfigOrderComparer());
@@ -99,15 +101,7 @@ namespace Depra.Configuration.Editor
         {
             for (var index = 0; index < _configs.Count; index++)
             {
-                var objectConfig = _configs[index];
-                var objectConfigName = ObjectConfigNamingUtility.GetInspectorName(objectConfig);
-
-                _isFoldout[index] = EditorGUILayout.Foldout(_isFoldout[index], objectConfigName);
-                if (_isFoldout[index])
-                {
-                    var serializedObject = new SerializedObject(objectConfig);
-                    DrawSerializedObject(serializedObject);
-                }
+                DrawConfig(_configs[index], index);
             }
         }
 
@@ -115,15 +109,19 @@ namespace Depra.Configuration.Editor
         {
             foreach (var index in _matchedIndexes)
             {
-                var objectConfig = _configs[index];
-                var objectConfigName = ObjectConfigNamingUtility.GetInspectorName(objectConfig);
+                DrawConfig(_configs[index], index);
+            }
+        }
 
-                _isFoldout[index] = EditorGUILayout.Foldout(_isFoldout[index], objectConfigName);
-                if (_isFoldout[index])
-                {
-                    var serializedObject = new SerializedObject(objectConfig);
-                    DrawSerializedObject(serializedObject);
-                }
+        private void DrawConfig(ConfigObject config, int index)
+        {
+            var objectConfigName = ConfigNamingUtility.GetInspectorName(config);
+
+            _isFoldout[index] = EditorGUILayout.Foldout(_isFoldout[index], objectConfigName);
+            if (_isFoldout[index])
+            {
+                var serializedObject = new SerializedObject(config);
+                DrawSerializedObject(serializedObject);
             }
         }
 
@@ -185,9 +183,9 @@ namespace Depra.Configuration.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
-        private static string GetConfigNameForSearch(ObjectConfig config)
+        private static string GetConfigNameForSearch(ConfigObject config)
         {
-            var configName = ObjectConfigNamingUtility.GetInspectorName(config);
+            var configName = ConfigNamingUtility.GetInspectorName(config);
             return ParseSearchRequest(configName);
         }
 

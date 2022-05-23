@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Depra.Configuration.Runtime.Assets;
 using Depra.Configuration.Runtime.Attributes;
-using Depra.Configuration.Runtime.SO;
 
 namespace Depra.Configuration.Editor.Utils
 {
-    internal class ConfigOrderComparer : IComparer<ObjectConfig>
+    internal class ConfigOrderComparer : IComparer<ConfigObject>
     {
-        public int Compare(ObjectConfig config1, ObjectConfig config2)
+        public int Compare(ConfigObject config1, ConfigObject config2)
         {
             if (config1 == null || config2 == null)
             {

@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace Depra.Configuration.Runtime.SO
+namespace Depra.Configuration.Runtime.Assets
 {
     /// <summary>
-    /// Has cached Instance.
+    /// Has single cached instance.
     /// </summary>
     /// <typeparam name="T">Inherited type</typeparam>
-    public abstract class ObjectConfig<T> : ObjectConfig where T : ObjectConfig<T>
+    public abstract class ConfigObject<T> : ConfigObject where T : ConfigObject<T>
     {
         private static T _internalInstance;
         private static readonly Type TypeCache = typeof(T);
@@ -25,11 +25,6 @@ namespace Depra.Configuration.Runtime.SO
 
                 return _internalInstance;
             }
-        }
-        
-        public static T GetConfig()
-        {
-            return GetConfig(TypeCache) as T;
         }
     }
 }

@@ -1,19 +1,22 @@
+using Depra.Configuration.Runtime.Assets;
 using Depra.Configuration.Runtime.Attributes;
-using Depra.Configuration.Runtime.SO;
-using NaughtyAttributes;
 using UnityEngine;
 
 namespace Depra.Configuration.Editor
 {
-    [Config("Editor", 1)]
-    public class EditorConfig : ObjectConfig<EditorConfig>
+    [SpecialConfig]
+    [Config(DisplayName = "Editor", OrderId = 1)]
+    public class EditorConfig : ConfigObject<EditorConfig>
     {
-        [field: SerializeField, BoxGroup] public bool StripConfigTypeFromName { get; private set; } = true;
+        [SerializeField] private bool _stripTypeFromName = true;
+        [SerializeField] private Color _validColor = Color.green;
+        [SerializeField] private Color _invalidColor = Color.red;
+        [SerializeField] private Color _normalColor = Color.white;
 
-        [field: SerializeField, BoxGroup] public Color ValidColor { get; private set; } = Color.green;
-
-        [field: SerializeField, BoxGroup] public Color InvalidColor { get; private set; } = Color.red;
-
-        [field: SerializeField, BoxGroup] public Color NormalColor { get; private set; } = Color.white;
+        public bool StripConfigTypeFromName => _stripTypeFromName;
+        
+        public Color ValidColor => _validColor;
+        public Color InvalidColor => _invalidColor;
+        public Color NormalColor => _normalColor;
     }
 }
